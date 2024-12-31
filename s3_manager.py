@@ -4,22 +4,33 @@ import os
 from botocore.exceptions import ClientError
 
 def main():
+    # Load environment variables
     load_dotenv()
+
+    # Load AWS credentials and region
     aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
     aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
     aws_region = os.getenv("AWS_REGION")
+
+    # Connect to S3
     s3 = boto3.client("s3", aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key, region_name=aws_region)
     print("Connected to S3 successfully!")
+
+    # Specify the bucket name
     bucket_name = "python-s3-demo-bucket"
+
+    # Main actions (get, upload, download, delete)
     get_file_list(s3, bucket_name)
     upload_file(s3, "C:/Users/ctami/OneDrive/Desktop/file3.txt", bucket_name, "file3.txt")
     download_file(s3, bucket_name, "file3.txt", "C:/Users/ctami/OneDrive/Desktop/test")
     delete_file(s3, bucket_name, "file3.txt")
 
+# Validate string inputs
 def validate_inputs(value, name):
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"Please specify a valid {name}")
-
+    
+# List files. S3 client and bucket name required
 def get_file_list(s3, bucket_name):
     try:
         validate_inputs(bucket_name, "bucket name")
@@ -35,6 +46,7 @@ def get_file_list(s3, bucket_name):
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 
+# Upload file. S3 client, file path, bucket and file name required
 def upload_file(s3, file_path, bucket_name, file_name):
     validate_inputs(bucket_name, "bucket name")
     validate_inputs(file_name, "file name")
@@ -51,7 +63,8 @@ def upload_file(s3, file_path, bucket_name, file_name):
     except Exception as e:
         print(f"An unexpected error occurred during upload: {e}")
         return False
-
+    
+# Download file. S3 client, bucket, file name required, destination path is optional, if left blank file downloads to current directory
 def download_file(s3, bucket_name, file_name, destination_path=None):
     validate_inputs(bucket_name, "bucket name")
     validate_inputs(file_name, "file name")
@@ -70,6 +83,7 @@ def download_file(s3, bucket_name, file_name, destination_path=None):
         print(f"An unexpected error occurred during upload: {e}")
         return False
 
+# Delete file. S3 client, bucket and file name required
 def delete_file(s3, bucket_name, file_name):
     validate_inputs(bucket_name, "bucket name")
     validate_inputs(file_name, "file name")
