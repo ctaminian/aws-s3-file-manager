@@ -1,9 +1,11 @@
+import os
+import sys
 import boto3
 from dotenv import load_dotenv
-import os
 from botocore.exceptions import ClientError
 
 def main():
+
     # Load environment variables
     load_dotenv()
 
@@ -19,11 +21,48 @@ def main():
     # Specify the bucket name
     bucket_name = "python-s3-demo-bucket"
 
+    # Load the main menu
+    load_menu(s3, bucket_name)
+
     # Main actions (get, upload, download, delete)
-    get_file_list(s3, bucket_name)
-    upload_file(s3, "C:/Users/ctami/OneDrive/Desktop/file3.txt", bucket_name, "file3.txt")
-    download_file(s3, bucket_name, "file3.txt", "C:/Users/ctami/OneDrive/Desktop/test")
-    delete_file(s3, bucket_name, "file3.txt")
+    # upload_file(s3, "C:/Users/ctami/OneDrive/Desktop/file3.txt", bucket_name, "file3.txt")
+    # download_file(s3, bucket_name, "file3.txt", "C:/Users/ctami/OneDrive/Desktop/test")
+    # delete_file(s3, bucket_name, "file3.txt")
+
+# Loads the main menu
+def load_menu(s3, bucket_name):
+    while True:
+        print("============================================")
+        print("             AWS S3 File Manager")
+        print("============================================")
+        print("Please choose an option:")
+        print("1. List files in the bucket")
+        print("2. Upload a file")
+        print("3. Download a file")
+        print("4. Delete a file")
+        print("5. Exit")
+        print("============================================")
+        try:
+            user_choice = int(input("Enter your choice (1-5): "))
+        except ValueError:
+            print("Invalud input. Please enter a number between 1 and 5.")
+            continue
+        match user_choice:
+            case 1:
+                print("You chose to list files in the bucket")
+                print("Fetching files...")
+                get_file_list(s3, bucket_name)
+            case 2:
+                print("2")
+            case 3:
+                print("3")
+            case 4:
+                print("4")
+            case 5:
+                print("Thank you for using the AWS S3 File Manager. Goodbye!")
+                sys.exit()
+            case _:
+                print("Invalid choice. Please enter a number between 1 and 5.")
 
 # Validate string inputs
 def validate_inputs(value, name):
