@@ -25,7 +25,6 @@ def main():
     load_menu(s3, bucket_name)
 
     # Main actions (get, upload, download, delete)
-    # upload_file(s3, "C:/Users/ctami/OneDrive/Desktop/file3.txt", bucket_name, "file3.txt")
     # download_file(s3, bucket_name, "file3.txt", "C:/Users/ctami/OneDrive/Desktop/test")
     # delete_file(s3, bucket_name, "file3.txt")
 
@@ -45,7 +44,7 @@ def load_menu(s3, bucket_name):
         try:
             user_choice = int(input("Enter your choice (1-5): "))
         except ValueError:
-            print("Invalud input. Please enter a number between 1 and 5.")
+            print("Invalid input. Please enter a number between 1 and 5.")
             continue
         match user_choice:
             case 1:
@@ -53,7 +52,16 @@ def load_menu(s3, bucket_name):
                 print("Fetching files...")
                 get_file_list(s3, bucket_name)
             case 2:
-                print("2")
+                print("You chose to upload files to the bucket")
+                file_path = input("Please enter the local file path: ").strip()
+                if not file_path:
+                    print("File path cannot be empty. Returning to menu.")
+                    continue
+                file_name = input("Please enter the file name to save in the bucket: ").strip()
+                if not file_name:
+                    print("File name cannot be empty. Returning to menu.")
+                    continue
+                upload_file(s3, file_path, bucket_name, file_name)
             case 3:
                 print("3")
             case 4:
