@@ -21,8 +21,22 @@ def main():
     # Specify the bucket name
     bucket_name = "python-s3-demo-bucket"
 
+    # Verify bucket exists
+    if not verify_bucket(s3, bucket_name):
+        print(f"Bucket '{bucket_name}' does not exist or is inaccessible. Exiting.")
+        sys.exit()
+
     # Load the main menu
     load_menu(s3, bucket_name)
+
+# Verify the bucket exists
+def verify_bucket(s3, bucket_name):
+    try:
+        s3.head_bucket(Bucket=bucket_name)
+        return True
+    except ClientError as e:
+        print(f"Error verifying bucket: {e.response['Error']['Message']}")
+        return False
 
 # Loads the main menu
 def load_menu(s3, bucket_name):
@@ -115,7 +129,7 @@ def upload_file(s3, file_path, bucket_name, file_name):
         print(f"Upload failed: {e.response['Error']['Message']}")
         return False
     except Exception as e:
-        print(f"An unexpected error occurred during upload: {e}")
+        print(f"An unexpected error occurred during the file upload: {e}")
         return False
     
 # Download file. S3 client, bucket, file name required, destination path is optional, if left blank file downloads to current directory
