@@ -25,7 +25,6 @@ def main():
     load_menu(s3, bucket_name)
 
     # Main actions (get, upload, download, delete)
-    # download_file(s3, bucket_name, "file3.txt", "C:/Users/ctami/OneDrive/Desktop/test")
     # delete_file(s3, bucket_name, "file3.txt")
 
 # Loads the main menu
@@ -63,7 +62,13 @@ def load_menu(s3, bucket_name):
                     continue
                 upload_file(s3, file_path, bucket_name, file_name)
             case 3:
-                print("3")
+                print("You chose to download files from the bucket")
+                file_name = input("Please enter the name of the file you want to download: ").strip()
+                if not file_name:
+                    print("File name cannot be empty. Returning to menu.")
+                    continue
+                destination_path = input("Please enter a destination path or leave empty to download to current working directory: ").strip()
+                download_file(s3, bucket_name, file_name, destination_path)
             case 4:
                 print("4")
             case 5:
