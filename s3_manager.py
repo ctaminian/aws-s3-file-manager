@@ -24,9 +24,6 @@ def main():
     # Load the main menu
     load_menu(s3, bucket_name)
 
-    # Main actions (get, upload, download, delete)
-    # delete_file(s3, bucket_name, "file3.txt")
-
 # Loads the main menu
 def load_menu(s3, bucket_name):
     while True:
@@ -67,10 +64,15 @@ def load_menu(s3, bucket_name):
                 if not file_name:
                     print("File name cannot be empty. Returning to menu.")
                     continue
-                destination_path = input("Please enter a destination path or leave empty to download to current working directory: ").strip()
+                destination_path = input("Please enter the destination path (e.g., C:/Users/YourName/Downloads) or leave empty to download to the current directory: ").strip()
                 download_file(s3, bucket_name, file_name, destination_path)
             case 4:
-                print("4")
+                print("You chose to delete a file from the bucket")
+                file_name = input("Please enter the name of the file you want to delete: ").strip()
+                if not file_name:
+                    print("File name cannot be empty. Returning to menu.")
+                    continue
+                delete_file(s3, bucket_name, file_name)
             case 5:
                 print("Thank you for using the AWS S3 File Manager. Goodbye!")
                 sys.exit()
@@ -132,7 +134,7 @@ def download_file(s3, bucket_name, file_name, destination_path=None):
         print(f"Download failed: {e.response['Error']['Message']}")
         return False
     except Exception as e:
-        print(f"An unexpected error occurred during upload: {e}")
+        print(f"An unexpected error occurred during the file download: {e}")
         return False
 
 # Delete file. S3 client, bucket and file name required
@@ -146,7 +148,7 @@ def delete_file(s3, bucket_name, file_name):
         print(f"Delete failed: {e.response['Error']['Message']}")
         return False
     except Exception as e:
-        print(f"An unexpected error occurred during upload: {e}")
+        print(f"An unexpected error occurred while deleting the file: {e}")
         return False
 
 if __name__ == "__main__":
