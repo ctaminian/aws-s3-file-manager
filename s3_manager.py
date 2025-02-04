@@ -1,6 +1,7 @@
 import os
 import sys
 import boto3
+import customtkinter
 from dotenv import load_dotenv
 from botocore.exceptions import ClientError
 
@@ -26,8 +27,61 @@ def main():
         print(f"Bucket '{bucket_name}' does not exist or is inaccessible. Exiting.")
         sys.exit()
 
-    # Load the main menu
-    load_menu(s3, bucket_name)
+    # Create the UI
+    customtkinter.set_appearance_mode("Dark")
+    app = customtkinter.CTk()
+    app.title("AWS S3 Manager")
+    app.geometry("600x800")
+
+    frame = customtkinter.CTkFrame(app)
+    frame.pack(padx=20, pady=20, fill="both", expand=True)
+
+    title_label = customtkinter.CTkLabel(frame, text="AWS S3 File Manager", font=("Helvetica", 20))
+    title_label.pack(padx=20, pady=10)
+
+    usage_label = customtkinter.CTkLabel(frame, text="Please click on any of the buttons below to begin.", font=("Helvetica", 12))
+    usage_label.pack(padx=20, pady=10)
+
+    list_button = customtkinter.CTkButton(frame,text="List Files", fg_color="#248823", hover_color="#014422", command=lambda: list_files(s3, bucket_name, output_textbox))
+    list_button.pack(padx=20, pady=10)
+
+    upload_button = customtkinter.CTkButton(frame,text="Upload File", fg_color="#248823", hover_color="#014422")
+    upload_button.pack(padx=20, pady=10)
+
+    download_button = customtkinter.CTkButton(frame,text="Download File", fg_color="#248823", hover_color="#014422")
+    download_button.pack(padx=20, pady=10)
+
+    delete_button = customtkinter.CTkButton(frame,text="Delete File", fg_color="#248823", hover_color="#014422")
+    delete_button.pack(padx=20, pady=10)
+
+    exit_button = customtkinter.CTkButton(frame,text="Exit", fg_color="#248823", hover_color="#014422", command=exit_program)
+    exit_button.pack(padx=20, pady=10)
+
+    output_textbox = customtkinter.CTkTextbox(frame, width=600, height=800, border_spacing=10)
+    output_textbox.pack(padx=20, pady=20)
+    
+    app.mainloop()
+
+def exit_program():
+    print("Thank you for using the AWS S3 File Manager. Goodbye!")
+    sys.exit()
+
+def list_files(s3, bucket_name, output_textbox):
+    output_textbox.insert("end","You chose to list files in the bucket\n")
+    output_textbox.insert("end","Fetching files...\n")
+    try:
+        validate_inputs(bucket_name, "bucket name")
+        file_list = s3.list_objects_v2(Bucket=bucket_name)
+        if "Contents" not in file_list:
+            output_textbox.insert("end","The bucket is empty.\n")
+            return
+        output_textbox.insert("end", f"You have {file_list['KeyCount']} files on this bucket:\n")
+        for i, file in enumerate(file_list["Contents"], start=1):
+            output_textbox.insert("end", f"{i}. {file['Key']}\n")
+    except ClientError as e:
+        print(f"Error fetching file list: {e.response['Error']['Message']}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 # Verify the bucket exists
 def verify_bucket(s3, bucket_name):
@@ -37,83 +91,12 @@ def verify_bucket(s3, bucket_name):
     except ClientError as e:
         print(f"Error verifying bucket: {e.response['Error']['Message']}")
         return False
-
-# Loads the main menu
-def load_menu(s3, bucket_name):
-    while True:
-        print("============================================")
-        print("             AWS S3 File Manager")
-        print("============================================")
-        print("Please choose an option:")
-        print("1. List files in the bucket")
-        print("2. Upload a file")
-        print("3. Download a file")
-        print("4. Delete a file")
-        print("5. Exit")
-        print("============================================")
-        try:
-            user_choice = int(input("Enter your choice (1-5): "))
-        except ValueError:
-            print("Invalid input. Please enter a number between 1 and 5.")
-            continue
-        match user_choice:
-            case 1:
-                print("You chose to list files in the bucket")
-                print("Fetching files...")
-                get_file_list(s3, bucket_name)
-            case 2:
-                print("You chose to upload files to the bucket")
-                file_path = input("Please enter the local file path: ").strip()
-                if not file_path:
-                    print("File path cannot be empty. Returning to menu.")
-                    continue
-                file_name = input("Please enter the file name to save in the bucket: ").strip()
-                if not file_name:
-                    print("File name cannot be empty. Returning to menu.")
-                    continue
-                upload_file(s3, file_path, bucket_name, file_name)
-            case 3:
-                print("You chose to download files from the bucket")
-                file_name = input("Please enter the name of the file you want to download: ").strip()
-                if not file_name:
-                    print("File name cannot be empty. Returning to menu.")
-                    continue
-                destination_path = input("Please enter the destination path (e.g., C:/Users/YourName/Downloads) or leave empty to download to the current directory: ").strip()
-                download_file(s3, bucket_name, file_name, destination_path)
-            case 4:
-                print("You chose to delete a file from the bucket")
-                file_name = input("Please enter the name of the file you want to delete: ").strip()
-                if not file_name:
-                    print("File name cannot be empty. Returning to menu.")
-                    continue
-                delete_file(s3, bucket_name, file_name)
-            case 5:
-                print("Thank you for using the AWS S3 File Manager. Goodbye!")
-                sys.exit()
-            case _:
-                print("Invalid choice. Please enter a number between 1 and 5.")
-
+    
 # Validate string inputs
 def validate_inputs(value, name):
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"Please specify a valid {name}")
     
-# List files. S3 client and bucket name required
-def get_file_list(s3, bucket_name):
-    try:
-        validate_inputs(bucket_name, "bucket name")
-        file_list = s3.list_objects_v2(Bucket=bucket_name)
-        if "Contents" not in file_list:
-            print("The bucket is empty.")
-            return
-        print(f"You have {file_list['KeyCount']} files on this bucket:")
-        for i, file in enumerate(file_list["Contents"], start=1):
-            print(f"{i}. {file['Key']}")
-    except ClientError as e:
-        print(f"Error fetching file list: {e.response['Error']['Message']}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-
 # Upload file. S3 client, file path, bucket and file name required
 def upload_file(s3, file_path, bucket_name, file_name):
     validate_inputs(bucket_name, "bucket name")
