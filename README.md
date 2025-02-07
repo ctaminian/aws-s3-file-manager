@@ -12,7 +12,7 @@ NOTES:
 The program uses the Boto3 Python library to interact with a S3 bucket using the AWS API.
 1) List Files: Simply lists all the files currently in the bucket.
 2) Upload File: Open a windows dialog box to select the file you want to upload.
-3) Download File: Opens a custom dialog window to type in the filename you wish to download.
+3) Download File: Opens a custom dialog window to type in the filename you wish to download. Files are downloaded to the "Downloads" folder by default.
 4) Delete File: Open a custom dialog window to type in the filename you wish to delete.
 5) Exit: Exits the program
 
