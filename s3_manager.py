@@ -55,7 +55,7 @@ def main():
     upload_button = customtkinter.CTkButton(top_frame, text="Upload File", fg_color="#248823", hover_color="#014422")
     upload_button.pack(side="left", padx=20, pady=20)
 
-    download_button = customtkinter.CTkButton(top_frame, text="Download File", fg_color="#248823", hover_color="#014422")
+    download_button = customtkinter.CTkButton(top_frame, text="Download File", fg_color="#248823", hover_color="#014422", command=lambda: get_filename_for_download(s3, bucket_name, output_textbox))
     download_button.pack(side="left", padx=20, pady=20)
 
     delete_button = customtkinter.CTkButton(top_frame, text="Delete File", fg_color="#248823", hover_color="#014422", command=lambda: get_filename_for_deletion(s3, bucket_name, output_textbox))
@@ -122,8 +122,26 @@ def upload_file(s3, file_path, bucket_name, file_name):
         print(f"An unexpected error occurred during the file upload: {e}")
         return False
 
+# When download button is clicked...call this function to show the popup dialog box
+def get_filename_for_download(s3, bucket_name, output_textbox):
+    dialog = customtkinter.CTkInputDialog(text="Type in the filename to download:", title="Download a file", button_fg_color="#248823", button_hover_color="#014422")
+    filename = dialog.get_input()
+    if filename:
+        confirm_and_download(s3, bucket_name, filename, output_textbox)
+
+# When filename is confirmed not to be empty, we can call this function to confirm file delete and actually calling ehe S3 delete function
+def confirm_and_download(s3, bucket_name, filename, output_textbox):
+    if not filename:
+        messagebox.showerror("Error", "No file name entered.")
+        return
+    downloaded = download_file(s3, bucket_name, filename, output_textbox)
+    if downloaded:
+        messagebox.showinfo("Success", f"'{filename}' downloaded successfully!")
+    else:
+        messagebox.showinfo("Cancelled", "File download cancelled.")
+
 # Download file. S3 client, bucket, file name required, destination path is optional
-def download_file(s3, bucket_name, file_name, destination_path=None):
+def download_file(s3, bucket_name, file_name, output_textbox, destination_path=None):
     validate_inputs(bucket_name, "bucket name")
     validate_inputs(file_name, "file name")
     if destination_path is None:
@@ -132,7 +150,7 @@ def download_file(s3, bucket_name, file_name, destination_path=None):
         destination_path = os.path.join(destination_path, file_name)
     try:
         s3.download_file(bucket_name, file_name, destination_path)
-        print(f"File '{file_name}' downloaded to '{destination_path}' successfully.")
+        output_textbox.insert("end", f"File '{file_name}' downloaded to '{destination_path}' successfully.")
         return True
     except ClientError as e:
         print(f"Download failed: {e.response['Error']['Message']}")
