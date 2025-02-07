@@ -3,6 +3,7 @@ import sys
 import boto3
 import customtkinter
 from tkinter import messagebox
+from tkinter import filedialog
 from dotenv import load_dotenv
 from botocore.exceptions import ClientError
 
@@ -52,7 +53,7 @@ def main():
     list_button = customtkinter.CTkButton(top_frame, text="List Files", fg_color="#248823", hover_color="#014422", command=lambda: list_files(s3, bucket_name, output_textbox))
     list_button.pack(side="left", padx=20, pady=20)
 
-    upload_button = customtkinter.CTkButton(top_frame, text="Upload File", fg_color="#248823", hover_color="#014422")
+    upload_button = customtkinter.CTkButton(top_frame, text="Upload File", fg_color="#248823", hover_color="#014422", command=lambda: select_file_to_upload(s3, bucket_name, output_textbox))
     upload_button.pack(side="left", padx=20, pady=20)
 
     download_button = customtkinter.CTkButton(top_frame, text="Download File", fg_color="#248823", hover_color="#014422", command=lambda: get_filename_for_download(s3, bucket_name, output_textbox))
@@ -104,24 +105,28 @@ def validate_inputs(value, name):
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"Please specify a valid {name}")
 
+# When upload file button is clicked, call this function to open the windows dialog box to select a file
+def select_file_to_upload(s3, bucket_name, output_textbox):
+    file_path = filedialog.askopenfilename()
+    if not file_path:
+        return
+    file_name = os.path.basename(file_path)
+    output_textbox.insert("end", f"uploading {file_name}...\n")
+    upload_file(s3, file_path, bucket_name, file_name, output_textbox)
+
 # Upload file. S3 client, file path, bucket and file name required
-def upload_file(s3, file_path, bucket_name, file_name):
-    validate_inputs(bucket_name, "bucket name")
-    validate_inputs(file_name, "file name")
-    if not os.path.exists(file_path):
-        print(f"Error: File '{file_path}' does not exist.")
-        return False
+def upload_file(s3, file_path, bucket_name, file_name, output_textbox):
     try:
         s3.upload_file(file_path, bucket_name, file_name)
-        print(f"File '{file_name}' uploaded to bucket '{bucket_name}' successfully.")
+        output_textbox.insert("end", f"File '{file_name}' uploaded to S3 bucket '{bucket_name}' successfully.\n")
         return True
     except ClientError as e:
-        print(f"Upload failed: {e.response['Error']['Message']}")
+        messagebox.showerror("Error", f"Upload failed: {e.response['Error']['Message']}")
         return False
     except Exception as e:
-        print(f"An unexpected error occurred during the file upload: {e}")
+        messagebox.showerror("Error", f"Unexpected error: {str(e)}")
         return False
-    
+
 # When download button is clicked...call this function to show the popup dialog box
 def get_filename_for_download(s3, bucket_name, output_textbox):
     dialog = customtkinter.CTkInputDialog(text="Type in the filename to download:", title="Download a file", button_fg_color="#248823", button_hover_color="#014422")
