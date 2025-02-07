@@ -77,7 +77,6 @@ def list_files(s3, bucket_name, output_textbox):
     output_textbox.insert("end", "Fetching files...\n")
     output_textbox.insert("end", "\n")
     try:
-        validate_inputs(bucket_name, "bucket name")
         file_list = s3.list_objects_v2(Bucket=bucket_name)
         if "Contents" not in file_list:
             output_textbox.insert("end", "The bucket is empty.\n")
@@ -99,11 +98,6 @@ def verify_bucket(s3, bucket_name):
     except ClientError as e:
         print(f"Error verifying bucket: {e.response['Error']['Message']}")
         return False
-
-# Validate string inputs
-def validate_inputs(value, name):
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"Please specify a valid {name}")
 
 # When upload file button is clicked, call this function to open the windows dialog box to select a file
 def select_file_to_upload(s3, bucket_name, output_textbox):
