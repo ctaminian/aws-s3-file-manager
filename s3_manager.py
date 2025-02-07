@@ -35,21 +35,25 @@ def main():
     app.title("AWS S3 Manager")
     app.geometry("1000x900")
 
+    # Create the frames to hold the menu items
     frame = customtkinter.CTkFrame(app)
     frame.pack(padx=20, pady=20, fill="both", expand=True)
 
     top_frame = customtkinter.CTkFrame(frame, fg_color="#242424")
     top_frame.pack(padx=20, pady=20)
 
+    # These are the labels
     title_label = customtkinter.CTkLabel(top_frame, text="AWS S3 File Manager", font=("Helvetica", 20))
     title_label.pack(padx=20, pady=10)
 
     usage_label = customtkinter.CTkLabel(top_frame, text="Please click on any of the buttons below to begin.", font=("Helvetica", 14))
     usage_label.pack(padx=20, pady=10)
 
+    # The output textbox located at the bottom of the UI
     output_textbox = customtkinter.CTkTextbox(frame, width=900, height=900, border_spacing=20, font=("Helvetica", 14), fg_color="#1d1e1e")
     output_textbox.pack(padx=20, pady=20)
 
+    # These are the main buttons for the app
     list_button = customtkinter.CTkButton(top_frame, text="List Files", fg_color="#248823", hover_color="#014422", command=lambda: list_files(s3, bucket_name, output_textbox))
     list_button.pack(side="left", padx=20, pady=20)
 
@@ -67,10 +71,12 @@ def main():
 
     app.mainloop()
  
+# When exit button is clicked, exit the program
 def exit_program():
     print("Thank you for using the AWS S3 File Manager. Goodbye!")
     sys.exit()
 
+# When list files button is clicked, fetch the files and list them into the output_textbox
 def list_files(s3, bucket_name, output_textbox):
     output_textbox.delete("1.0", "end")
     output_textbox.insert("end", "You chose to list files in the bucket\n")
