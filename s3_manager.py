@@ -147,7 +147,10 @@ def download_file(s3, bucket_name, file_name, output_textbox):
     except ClientError as e:
         messagebox.showerror("Error", f"Download failed: {e.response['Error']['Message']}")
         return False
-    
+    except Exception as e:
+        messagebox.showerror("Error", f"Unexpected error: {str(e)}")
+        return False
+
 # When delete button is clicked...call this function to show the popup dialog box
 def get_filename_for_deletion(s3, bucket_name, output_textbox):
     dialog = customtkinter.CTkInputDialog(text="Type in the filename to delete:", title="Delete a file", button_fg_color="#248823", button_hover_color="#014422")
@@ -157,39 +160,27 @@ def get_filename_for_deletion(s3, bucket_name, output_textbox):
 
 # When filename is confirmed not to be empty, we can call this function to confirm file delete and actually calling ehe S3 delete function
 def confirm_and_delete(s3, bucket_name, filename, output_textbox):
-    if not filename:
-        messagebox.showerror("Error", "No file name entered.")
-        return
     confirm = messagebox.askyesno("Confirm Deletion", f"Are you sure you want to delete '{filename}'?")
     if confirm:
         deleted = delete_file(s3, bucket_name, filename, output_textbox)
         if deleted:
             messagebox.showinfo("Success", f"'{filename}' deleted successfully!")
-    else:
-        messagebox.showinfo("Cancelled", "File deletion cancelled.")
 
 # Delete file. S3 client, bucket and file name required
 def delete_file(s3, bucket_name, file_name, output_textbox):
-    validate_inputs(bucket_name, "bucket name")
-    validate_inputs(file_name, "file name")
     response = s3.list_objects_v2(Bucket=bucket_name, Prefix=file_name)
     if "Contents" not in response:
-        error_message = f"File '{file_name}' does not exist in the bucket."
-        output_textbox.insert("end", f"{error_message}\n")
-        messagebox.showerror("Error", error_message)
+        messagebox.showerror("Error", f"File '{file_name}' does not exist in the bucket.")
         return False
     try:
         s3.delete_object(Bucket=bucket_name, Key=file_name)
         output_textbox.insert("end", f"File '{file_name}' deleted successfully from bucket '{bucket_name}'.\n")
         return True
     except ClientError as e:
-        error_message = e.response['Error']['Message']
-        output_textbox.insert("end", f"Delete failed: {error_message}\n")
-        messagebox.showerror("Error", f"Failed to delete '{file_name}': {error_message}")
+        messagebox.showerror("Error", f"Deletion failed: {e.response['Error']['Message']}")
         return False
     except Exception as e:
-        output_textbox.insert("end", f"An unexpected error occurred: {e}\n")
-        messagebox.showerror("Error", f"Unexpected error while deleting '{file_name}': {e}")
+        messagebox.showerror("Error", f"Unexpected error: {str(e)}")
         return False
 
 if __name__ == "__main__":
