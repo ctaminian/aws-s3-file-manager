@@ -121,7 +121,7 @@ def upload_file(s3, file_path, bucket_name, file_name):
     except Exception as e:
         print(f"An unexpected error occurred during the file upload: {e}")
         return False
-
+    
 # When download button is clicked...call this function to show the popup dialog box
 def get_filename_for_download(s3, bucket_name, output_textbox):
     dialog = customtkinter.CTkInputDialog(text="Type in the filename to download:", title="Download a file", button_fg_color="#248823", button_hover_color="#014422")
@@ -129,36 +129,25 @@ def get_filename_for_download(s3, bucket_name, output_textbox):
     if filename:
         confirm_and_download(s3, bucket_name, filename, output_textbox)
 
-# When filename is confirmed not to be empty, we can call this function to confirm file delete and actually calling ehe S3 delete function
+# When filename is confirmed not to be empty, we can call this function to confirm file download and actually calling ehe S3 download function
 def confirm_and_download(s3, bucket_name, filename, output_textbox):
-    if not filename:
-        messagebox.showerror("Error", "No file name entered.")
-        return
-    downloaded = download_file(s3, bucket_name, filename, output_textbox)
-    if downloaded:
-        messagebox.showinfo("Success", f"'{filename}' downloaded successfully!")
-    else:
-        messagebox.showinfo("Cancelled", "File download cancelled.")
+    confirm = messagebox.askyesno("Confirm Download", f"Do you want to download '{filename}'?")
+    if confirm:
+        downloaded = download_file(s3, bucket_name, filename, output_textbox)
+        if downloaded:
+            messagebox.showinfo("Success", f"'{filename}' downloaded successfully!")
 
 # Download file. S3 client, bucket, file name required, destination path is optional
-def download_file(s3, bucket_name, file_name, output_textbox, destination_path=None):
-    validate_inputs(bucket_name, "bucket name")
-    validate_inputs(file_name, "file name")
-    if destination_path is None:
-        destination_path = os.path.join(os.getcwd(), file_name)
-    elif os.path.isdir(destination_path):
-        destination_path = os.path.join(destination_path, file_name)
+def download_file(s3, bucket_name, file_name, output_textbox):
+    destination_path = os.path.join(os.path.expanduser("~"), "Downloads", file_name)
     try:
         s3.download_file(bucket_name, file_name, destination_path)
         output_textbox.insert("end", f"File '{file_name}' downloaded to '{destination_path}' successfully.")
         return True
     except ClientError as e:
-        print(f"Download failed: {e.response['Error']['Message']}")
+        messagebox.showerror("Error", f"Download failed: {e.response['Error']['Message']}")
         return False
-    except Exception as e:
-        print(f"An unexpected error occurred during the file download: {e}")
-        return False
-        
+    
 # When delete button is clicked...call this function to show the popup dialog box
 def get_filename_for_deletion(s3, bucket_name, output_textbox):
     dialog = customtkinter.CTkInputDialog(text="Type in the filename to delete:", title="Delete a file", button_fg_color="#248823", button_hover_color="#014422")
