@@ -9,7 +9,7 @@ NOTES:
 - If you know what your doing, you can absolutely modify this to work for you. Just create your own S3 bucket, import your credentials, and change the bucket name in the code.
 
 ## How It Works:
-The program uses the Boto3 Python library to interact with an AWS S3 bucket. For the UI, I used custom Tkinter and Tkinter.
+The program uses the Boto3 Python library to interact with a S3 bucket using the AWS API.
 1) List Files: Simply lists all the files currently in the bucket.
 2) Upload File: Open a windows dialog box to select the file you want to upload.
 3) Download File: Opens a custom dialog window to type in the filename you wish to download.
